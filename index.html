@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f2f52" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DealOS" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>DealOS Action OS</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Close One Deal</p>
+        <h1>DealOS</h1>
+        <p id="todayLine" class="subhead">Loading action loop…</p>
+      </div>
+      <button id="toggleSettingsBtn" class="icon-button" type="button" aria-label="Open tools menu">⋯</button>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-copy-wrap">
+        <p class="eyebrow eyebrow-light">Action OS v1.3</p>
+        <h2>Touch targets. Move deals.</h2>
+        <p class="hero-copy">A mobile-first execution loop built to keep the work outward: identify, touch, advance.</p>
+      </div>
+      <div class="hero-row">
+        <div class="progress-wrap progress-wrap-dark">
+          <span id="closeGoalLabel">0 / 1 deal closed</span>
+          <div class="progress-bar"><div id="closeGoalBar"></div></div>
+        </div>
+        <span id="lastActionBadge" class="badge badge-ghost">No actions yet</span>
+      </div>
+      <div id="topStatsStrip" class="top-stats"></div>
+    </section>
+
+    <section id="settingsSheet" class="settings-sheet hidden" aria-label="Tools and settings">
+      <div class="sheet-card">
+        <div class="sheet-handle"></div>
+        <p class="eyebrow">Tools</p>
+        <div class="settings-actions">
+          <button id="exportBtn" type="button" class="secondary">Export JSON</button>
+          <label class="import-label secondary">
+            Import JSON
+            <input id="importInput" type="file" accept="application/json" hidden />
+          </label>
+          <button id="resetBtn" type="button" class="danger">Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="quickActionSheet" class="quick-sheet hidden" aria-label="Quick actions">
+      <div class="sheet-card">
+        <div class="sheet-handle"></div>
+        <p class="eyebrow">Quick Add</p>
+        <div class="quick-grid">
+          <button id="fabAddTarget" type="button">+ Add Target</button>
+          <button id="fabAddTouch" type="button" class="secondary inverse">+ Log Touch</button>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <section id="dashboard" class="screen">
+        <div class="screen-head">
+          <p class="eyebrow">Today</p>
+          <h2>Home</h2>
+        </div>
+
+        <div class="today-stack">
+          <article class="today-card emphasis">
+            <div>
+              <p class="card-kicker">Primary pressure</p>
+              <h3>What matters now</h3>
+            </div>
+            <ul id="pressureList" class="pressure-list"></ul>
+          </article>
+
+          <div id="metricGrid" class="metric-grid"></div>
+        </div>
+      </section>
+
+      <section id="targets" class="screen">
+        <div class="screen-head split">
+          <div>
+            <p class="eyebrow">Who</p>
+            <h2>Targets</h2>
+          </div>
+          <span class="section-chip">Keep the list alive</span>
+        </div>
+
+        <form id="targetForm" class="form-panel">
+          <input type="hidden" id="targetId" />
+          <label>
+            Name
+            <input id="targetName" required maxlength="100" placeholder="Andre Sloan" />
+          </label>
+          <label>
+            Organization
+            <input id="targetOrg" maxlength="100" placeholder="Firm, company, or personal network" />
+          </label>
+          <label>
+            Source
+            <select id="targetSource">
+              <option>Warm Network</option>
+              <option>Cold</option>
+              <option>Referral</option>
+              <option>Family</option>
+              <option>Friend</option>
+              <option>Former Colleague</option>
+            </select>
+          </label>
+          <label>
+            Estimated Deal Value ($)
+            <input id="targetValue" type="number" min="0" step="1" placeholder="25000" />
+          </label>
+          <label>
+            Warmth
+            <select id="targetWarmth">
+              <option value="1">1 - Very cold</option>
+              <option value="2">2</option>
+              <option value="3" selected>3 - Neutral</option>
+              <option value="4">4</option>
+              <option value="5">5 - Very warm</option>
+            </select>
+          </label>
+          <label>
+            Pipeline Stage
+            <select id="targetStage"></select>
+          </label>
+          <label class="full-span">
+            Notes
+            <textarea id="targetNotes" rows="3" placeholder="Why this target matters, key context, next angle."></textarea>
+          </label>
+          <div class="form-actions full-span sticky-actions">
+            <button type="submit">Save Target</button>
+            <button type="button" id="clearTargetBtn" class="secondary">Clear</button>
+          </div>
+        </form>
+
+        <div id="targetCards" class="mobile-target-list"></div>
+
+        <div class="table-wrap desktop-only">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Source</th>
+                <th>Stage</th>
+                <th>Value</th>
+                <th>Last Touch</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="targetsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="communications" class="screen">
+        <div class="screen-head split">
+          <div>
+            <p class="eyebrow">Outward Motion</p>
+            <h2>Touches</h2>
+          </div>
+          <span class="section-chip">Every touch counts</span>
+        </div>
+
+        <form id="commForm" class="form-panel">
+          <input type="hidden" id="commId" />
+          <label>
+            Target
+            <select id="commTarget" required></select>
+          </label>
+          <label>
+            Type
+            <select id="commType">
+              <option>Email</option>
+              <option>Text</option>
+              <option>Call</option>
+              <option>Voice Memo</option>
+              <option>In Person</option>
+              <option>DM</option>
+              <option>Follow-Up</option>
+            </select>
+          </label>
+          <label>
+            Timestamp
+            <input id="commTimestamp" type="datetime-local" required />
+          </label>
+          <label>
+            Outcome
+            <select id="commOutcome">
+              <option value="No Response Yet">No Response Yet</option>
+              <option value="Sent">Sent</option>
+              <option value="Reply Received">Reply Received</option>
+              <option value="Meeting Suggested">Meeting Suggested</option>
+              <option value="Not Interested">Not Interested</option>
+              <option value="Needs Follow-Up">Needs Follow-Up</option>
+            </select>
+          </label>
+          <label>
+            Next Follow-Up
+            <input id="commFollowUp" type="date" />
+          </label>
+          <label>
+            Move Pipeline To
+            <select id="commStageMove"></select>
+          </label>
+          <label class="full-span">
+            Summary
+            <textarea id="commSummary" rows="3" required placeholder="What did you send or learn?"></textarea>
+          </label>
+          <div class="form-actions full-span sticky-actions">
+            <button type="submit">Log Touch</button>
+            <button type="button" id="clearCommBtn" class="secondary">Clear</button>
+          </div>
+        </form>
+
+        <div id="commList" class="stack"></div>
+      </section>
+
+      <section id="pipeline" class="screen">
+        <div class="screen-head split">
+          <div>
+            <p class="eyebrow">Where Things Stand</p>
+            <h2>Pipeline</h2>
+          </div>
+          <span class="section-chip">Swipe lanes</span>
+        </div>
+        <div id="pipelineBoard" class="pipeline-board"></div>
+      </section>
+    </main>
+
+    <button id="fabToggle" class="fab" type="button" aria-label="Open quick actions">＋</button>
+
+    <nav class="tabbar" aria-label="Primary">
+      <a class="tab-link active" href="#dashboard"><span class="tab-icon">⌂</span><span>Home</span></a>
+      <a class="tab-link" href="#targets"><span class="tab-icon">◎</span><span>Targets</span></a>
+      <a class="tab-link" href="#communications"><span class="tab-icon">✎</span><span>Touches</span></a>
+      <a class="tab-link" href="#pipeline"><span class="tab-icon">▤</span><span>Pipeline</span></a>
+    </nav>
+  </div>
+
+  <template id="metricTemplate">
+    <article class="metric-card">
+      <p class="metric-label"></p>
+      <p class="metric-value"></p>
+      <p class="metric-note"></p>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
